@@ -16,6 +16,28 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class TodoItem extends StatelessWidget {  //creates a new item in the list, a title/name is required to add
+  final String title;
+
+  const TodoItem({super.key, required this.title});
+  
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 60,
+      margin: EdgeInsetsGeometry.all(5),
+      child: Row(
+        children: [
+          Icon(Icons.square_outlined),
+          Text(title, style: TextStyle(fontSize: 20)),
+          Spacer(),
+          Icon(Icons.close),
+        ],
+      ),
+    );
+  }
+}  
+
 class MyHomePage extends StatelessWidget {
   final String title;
 
@@ -30,7 +52,7 @@ class MyHomePage extends StatelessWidget {
         title: Text('TIG333 TODO'),
         centerTitle: true,
         actions: [
-          PopupMenuButton(itemBuilder: (context) =>[
+          PopupMenuButton(itemBuilder: (context) =>[     //menu in the upper right corner for filtering
             PopupMenuItem(child: Text('all'), value: 1),
             PopupMenuItem(child: Text('done'), value: 2),
             PopupMenuItem(child: Text('undone'), value: 3),
@@ -38,38 +60,21 @@ class MyHomePage extends StatelessWidget {
         ],
         
       ),
-      body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(height: 50, color: Colors.white,
-            child: Row(
-              children: [
-                Icon(Icons.square_outlined),
-                Text('Write a book', style: TextStyle(fontSize: 20),),
-                Spacer(),
-                Icon(Icons.close)
-              ],
-            ),),
-            Container(height: 50, color: Colors.blue,
-            child: Text('Do homework'),),
-            Container(height: 50, color: Colors.green,
-            child: Text('Tidy room'),),
-            Container(height: 50, color: Colors.yellow,
-            child: Text('Watch TV'),),
-            Container(height: 50, color: Colors.green,
-            child: Text('Nap'),),
-            Container(height: 50, color: Colors.red,
-            child: Text('Shop groceries'),),
-            Container(height: 50, color: Colors.green,
-            child: Text('Have fun'),),
-            Container(height: 50, color: Colors.purple,
-            child: Text('Meditate'),)
+      body: ListView(                            //using the TodoItem class to add a new item in the list, title is required
+        children: [
+          TodoItem(title: 'Write a book'),
+          TodoItem(title: 'Do homework'),
+          TodoItem(title: 'Tidy room'),
+          TodoItem(title: 'Watch TV'),
+          TodoItem(title: 'Nap'),
+          TodoItem(title: 'Shop groceries'),
+          TodoItem(title: 'Have fun'),
+          TodoItem(title: 'Meditate'),
           ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        shape: const CircleBorder(),
+          ),
+
+      floatingActionButton: FloatingActionButton(              //button to navigate to the next page (AddPage())
+        shape: CircleBorder(),
         backgroundColor: Colors.pink,
         child: Icon(Icons.add, color: Colors.white,),
         onPressed: (){
@@ -84,7 +89,7 @@ class MyHomePage extends StatelessWidget {
   }
 }
 
-class AddPage extends StatelessWidget{
+class AddPage extends StatelessWidget{    //the second page
   const AddPage({super.key});
 
   @override
@@ -110,7 +115,7 @@ class AddPage extends StatelessWidget{
                     ),
                 Container(
                   child: TextButton(
-                    child: Text('+ Add', style: TextStyle(color: Colors.black),), onPressed: (){}
+                    child: Text('+ Add', style: TextStyle(color: Colors.black),), onPressed: (){} 
                   ),
                 ),
             ],
