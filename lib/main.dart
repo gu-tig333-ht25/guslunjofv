@@ -11,10 +11,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'TODO assignment',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
      home: MyHomePage(title: 'assignment',)
     );
   }
@@ -31,7 +27,16 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.pink,
-        title: Center(child: Text('TIG333 TODO')),
+        title: Text('TIG333 TODO'),
+        centerTitle: true,
+        actions: [
+          PopupMenuButton(itemBuilder: (context) =>[
+            PopupMenuItem(child: Text('all'), value: 1),
+            PopupMenuItem(child: Text('done'), value: 2),
+            PopupMenuItem(child: Text('undone'), value: 3),
+          ])
+        ],
+        
       ),
       body: Center(
         child: Column(
@@ -41,7 +46,7 @@ class MyHomePage extends StatelessWidget {
             child: Row(
               children: [
                 Icon(Icons.square_outlined),
-                Text('Write a book'),
+                Text('Write a book', style: TextStyle(fontSize: 20),),
                 Spacer(),
                 Icon(Icons.close)
               ],
@@ -62,7 +67,41 @@ class MyHomePage extends StatelessWidget {
             child: Text('Meditate'),)
           ],
         ),
-      ), 
+      ),
+      floatingActionButton: FloatingActionButton(
+        shape: const CircleBorder(),
+        backgroundColor: Colors.pink,
+        child: Icon(Icons.add, color: Colors.white,),
+        onPressed: (){
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context)=> const AddPage(),
+            ),
           );
+        },
+      ),
+          );
+  }
+}
+
+class AddPage extends StatelessWidget{
+  const AddPage({super.key});
+
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.pink,
+        title: Text('TIG333 TODO'),
+        centerTitle: true
+        ),
+        body: Center(
+          child: FloatingActionButton(onPressed: (){
+            Navigator.pop(context); //go back to homepage
+          },
+          ),
+        ),
+
+    );
   }
 }
