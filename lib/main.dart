@@ -96,12 +96,26 @@ class AddPage extends StatelessWidget{
         centerTitle: true
         ),
         body: Center(
-          child: FloatingActionButton(onPressed: (){
-            Navigator.pop(context); //go back to homepage
-          },
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(20),
+                child: 
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'What are you going to do?',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
+                    ),
+                    ),
+                    ),
+                Container(
+                  child: TextButton(
+                    child: Text('+ Add', style: TextStyle(color: Colors.black),), onPressed: (){}
+                  ),
+                ),
+            ],
           ),
-        ),
-
-    );
+          ),
+        );
   }
 }
