@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class MyState{
+  //gör något här!!
+}
 
 void main() {
-  runApp(MyApp());
+  MyState state = MyState();
+
+  runApp(
+    Provider(create: (context) => state,
+    child: 
+    MyApp(),
+    ),
+    );
 }
 
 class MyApp extends StatelessWidget {
@@ -53,9 +65,9 @@ class MyHomePage extends StatelessWidget {
         centerTitle: true,
         actions: [
           PopupMenuButton(itemBuilder: (context) =>[     //menu in the upper right corner for filtering
-            PopupMenuItem(child: Text('all'), value: 1),
-            PopupMenuItem(child: Text('done'), value: 2),
-            PopupMenuItem(child: Text('undone'), value: 3),
+            PopupMenuItem(value: 1, child: Text('all')),
+            PopupMenuItem(value: 2, child: Text('done'), ),
+            PopupMenuItem(value: 3, child: Text('undone'),),
           ])
         ],
         
