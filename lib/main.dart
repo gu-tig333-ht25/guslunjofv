@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class MyState{
-  //gör något här!!
+class MyState extends ChangeNotifier{
+  final List<String> _todos = [
+    "Write a book",
+    "Do homework",
+    "Tidy room",
+    "Watch TV",
+    "Nap",
+    "Shop groceries",
+    "Have fun",
+    "Meditate",
+  ];
+
+  List<String> get todos => _todos;
+
+  void addTodo(String title) {
+    _todos.add(title);
+    notifyListeners();
+}
+  void removeTodo(String title) {
+    _todos.remove(title);
+    notifyListeners();
+  }
 }
 
 void main() {
-  MyState state = MyState();
+  //MyState state = MyState();
 
   runApp(
-    Provider(create: (context) => state,
-    child: 
-    MyApp(),
+    ChangeNotifierProvider(create: (context) => MyState(),
+    child: MyApp(),
     ),
     );
 }
@@ -28,22 +47,24 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class TodoItem extends StatelessWidget {  //creates a new item in the list, a title/name is required to add
+class TodoItem extends StatelessWidget {  //creates (or removes) a new item in the list, a title/name is required to add
   final String title;
 
   const TodoItem({super.key, required this.title});
   
   @override
   Widget build(BuildContext context) {
+    var state = context.read<MyState>();
+
     return Container(
       height: 60,
       margin: EdgeInsetsGeometry.all(5),
       child: Row(
         children: [
-          Icon(Icons.square_outlined),
+          IconButton(icon: Icon(Icons.square_outlined), onPressed: (){},),  //gör om detta till en iconbutton också (för att kunna kryssa i rutan)?? 
           Text(title, style: TextStyle(fontSize: 20)),
           Spacer(),
-          Icon(Icons.close),
+          IconButton(icon: Icon(Icons.close), onPressed: () => state.removeTodo(title),), //remove item if user clicks on the iconbutton
         ],
       ),
     );
@@ -58,6 +79,8 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var state = context.watch<MyState>();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.pink,
@@ -73,16 +96,7 @@ class MyHomePage extends StatelessWidget {
         
       ),
       body: ListView(                            //using the TodoItem class to add a new item in the list, title is required
-        children: [
-          TodoItem(title: 'Write a book'),
-          TodoItem(title: 'Do homework'),
-          TodoItem(title: 'Tidy room'),
-          TodoItem(title: 'Watch TV'),
-          TodoItem(title: 'Nap'),
-          TodoItem(title: 'Shop groceries'),
-          TodoItem(title: 'Have fun'),
-          TodoItem(title: 'Meditate'),
-          ],
+        children: state.todos.map((title) => TodoItem(title: title)).toList(),
           ),
 
       floatingActionButton: FloatingActionButton(              //button to navigate to the next page (AddPage())
@@ -106,6 +120,9 @@ class AddPage extends StatelessWidget{    //the second page
 
   @override
   Widget build(BuildContext context){
+    final TextEditingController controller = TextEditingController();
+    var state = context.read<MyState>();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.pink,
@@ -119,6 +136,8 @@ class AddPage extends StatelessWidget{    //the second page
                 padding: EdgeInsets.all(20),
                 child: 
                 TextField(
+                  controller: controller,
+                  enableSuggestions: false,       //the suggestion bar is in the way of the textfield without this (but it's not the best solution...)
                   decoration: InputDecoration(
                     hintText: 'What are you going to do?',
                     border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
@@ -127,7 +146,12 @@ class AddPage extends StatelessWidget{    //the second page
                     ),
                 Container(
                   child: TextButton(
-                    child: Text('+ Add', style: TextStyle(color: Colors.black),), onPressed: (){} 
+                    child: Text('+ Add', style: TextStyle(color: Colors.black),),
+                    onPressed: (){
+                      if (controller.text.isNotEmpty){
+                        state.addTodo(controller.text);
+                      }
+                    } 
                   ),
                 ),
             ],
