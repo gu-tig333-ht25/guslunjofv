@@ -2,26 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class MyState extends ChangeNotifier{
-  final List<String> _todos = [
-    "Write a book",
-    "Do homework",
-    "Tidy room",
-    "Watch TV",
-    "Nap",
-    "Shop groceries",
-    "Have fun",
-    "Meditate",
-    "Cook food"
+  final List<Todo> _todos = [          //list with the items included in the app's todolist
+    Todo(title: 'Write a book'),
+    Todo(title: 'Do homework'),
+    Todo(title: 'Tidy room', done: true),
+    Todo(title: 'Watch TV'),
+    Todo(title: 'Nap'),
+    Todo(title: 'Shop groceries'),
+    Todo(title: 'Have fun'),
+    Todo(title: 'Meditate'),
   ];
 
-  List<String> get todos => _todos;
+  List<Todo> get todos => _todos;
 
   void addTodo(String title) {
-    _todos.add(title);
+    _todos.add(Todo(title: title));
     notifyListeners();
 }
-  void removeTodo(String title) {
-    _todos.remove(title);
+  void removeTodo(Todo todo) {
+    _todos.remove(todo);
+    notifyListeners();
+  }
+    void checkTodo(Todo todo, bool? value) {  
+    todo.done = value ?? false;               //if value is null, set todo.done to false
     notifyListeners();
   }
 }
@@ -34,6 +37,13 @@ void main() {
     child: MyApp(),
     ),
     );
+}
+
+class Todo {         //class with title and done (true/false), can take more info than only a list taking String (as used before)
+  String title;
+  bool done;
+
+  Todo({required this.title, this.done = false});
 }
 
 class MyApp extends StatelessWidget {
@@ -49,9 +59,9 @@ class MyApp extends StatelessWidget {
 }
 
 class TodoItem extends StatelessWidget {  //creates (or removes) a new item in the list, a title/name is required to add
-  final String title;
+  final Todo todo;
 
-  const TodoItem({super.key, required this.title});
+  const TodoItem({super.key, required this.todo});
   
   @override
   Widget build(BuildContext context) {
@@ -62,10 +72,10 @@ class TodoItem extends StatelessWidget {  //creates (or removes) a new item in t
       margin: EdgeInsetsGeometry.all(5),
       child: Row(
         children: [
-          IconButton(icon: Icon(Icons.square_outlined), onPressed: (){},),  //gör om detta till en iconbutton också (för att kunna kryssa i rutan)?? 
-          Text(title, style: TextStyle(fontSize: 20)),
+          Checkbox(value: todo.done, onChanged: (newValue){state.checkTodo(todo, newValue);}, activeColor: Colors.pink), //"newValue" is set to true or false when the box is clicked 
+          Text(todo.title, style: TextStyle(fontSize: 20, decoration: todo.done ? TextDecoration.lineThrough : TextDecoration.none)), //format= condition ? valueIfTrue : valueIfFalse
           Spacer(),
-          IconButton(icon: Icon(Icons.close), onPressed: () => state.removeTodo(title),), //remove item if user clicks on the iconbutton
+          IconButton(icon: Icon(Icons.close), onPressed: () => state.removeTodo(todo),), //remove item if user clicks on the iconbutton
         ],
       ),
     );
@@ -96,8 +106,8 @@ class MyHomePage extends StatelessWidget {
         ],
         
       ),
-      body: ListView(                            //using the TodoItem class to add a new item in the list, title is required
-        children: state.todos.map((title) => TodoItem(title: title)).toList(),
+      body: ListView(                            //builds a new TodoItem widget for every Todo in the list
+        children: state.todos.map((todo) => TodoItem(todo: todo)).toList(),
           ),
 
       floatingActionButton: FloatingActionButton(              //button to navigate to the next page (AddPage())
