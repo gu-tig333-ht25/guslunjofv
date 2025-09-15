@@ -11,6 +11,7 @@ class MyState extends ChangeNotifier{
     "Shop groceries",
     "Have fun",
     "Meditate",
+    "Cook food"
   ];
 
   List<String> get todos => _todos;
