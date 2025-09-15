@@ -1,123 +1,162 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class MyState extends ChangeNotifier{
+  final List<String> _todos = [
+    "Write a book",
+    "Do homework",
+    "Tidy room",
+    "Watch TV",
+    "Nap",
+    "Shop groceries",
+    "Have fun",
+    "Meditate",
+  ];
+
+  List<String> get todos => _todos;
+
+  void addTodo(String title) {
+    _todos.add(title);
+    notifyListeners();
+}
+  void removeTodo(String title) {
+    _todos.remove(title);
+    notifyListeners();
+  }
+}
 
 void main() {
-  runApp(MyApp());
+  //MyState state = MyState();
+
+  runApp(
+    ChangeNotifierProvider(create: (context) => MyState(),
+    child: MyApp(),
+    ),
+    );
 }
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'TODO assignment',
+     home: MyHomePage(title: 'assignment',)
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
+class TodoItem extends StatelessWidget {  //creates (or removes) a new item in the list, a title/name is required to add
   final String title;
 
+  const TodoItem({super.key, required this.title});
+  
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+  Widget build(BuildContext context) {
+    var state = context.read<MyState>();
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+    return Container(
+      height: 60,
+      margin: EdgeInsetsGeometry.all(5),
+      child: Row(
+        children: [
+          IconButton(icon: Icon(Icons.square_outlined), onPressed: (){},),  //gör om detta till en iconbutton också (för att kunna kryssa i rutan)?? 
+          Text(title, style: TextStyle(fontSize: 20)),
+          Spacer(),
+          IconButton(icon: Icon(Icons.close), onPressed: () => state.removeTodo(title),), //remove item if user clicks on the iconbutton
+        ],
+      ),
+    );
   }
+}  
+
+class MyHomePage extends StatelessWidget {
+  final String title;
+
+  MyHomePage({super.key, required this.title});
+
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    var state = context.watch<MyState>();
+
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        backgroundColor: Colors.pink,
+        title: Text('TIG333 TODO'),
+        centerTitle: true,
+        actions: [
+          PopupMenuButton(itemBuilder: (context) =>[     //menu in the upper right corner for filtering
+            PopupMenuItem(value: 1, child: Text('all')),
+            PopupMenuItem(value: 2, child: Text('done'), ),
+            PopupMenuItem(value: 3, child: Text('undone'),),
+          ])
+        ],
+        
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+      body: ListView(                            //using the TodoItem class to add a new item in the list, title is required
+        children: state.todos.map((title) => TodoItem(title: title)).toList(),
+          ),
+
+      floatingActionButton: FloatingActionButton(              //button to navigate to the next page (AddPage())
+        shape: CircleBorder(),
+        backgroundColor: Colors.pink,
+        child: Icon(Icons.add, color: Colors.white,),
+        onPressed: (){
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context)=> const AddPage(),
             ),
-          ],
-        ),
+          );
+        },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+          );
+  }
+}
+
+class AddPage extends StatelessWidget{    //the second page
+  const AddPage({super.key});
+
+  @override
+  Widget build(BuildContext context){
+    final TextEditingController controller = TextEditingController();
+    var state = context.read<MyState>();
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.pink,
+        title: Text('TIG333 TODO'),
+        centerTitle: true
+        ),
+        body: Center(
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(20),
+                child: 
+                TextField(
+                  controller: controller,
+                  enableSuggestions: false,       //the suggestion bar is in the way of the textfield without this (but it's not the best solution...)
+                  decoration: InputDecoration(
+                    hintText: 'What are you going to do?',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
+                    ),
+                    ),
+                    ),
+                Container(
+                  child: TextButton(
+                    child: Text('+ Add', style: TextStyle(color: Colors.black),),
+                    onPressed: (){
+                      if (controller.text.isNotEmpty){
+                        state.addTodo(controller.text);
+                      }
+                    } 
+                  ),
+                ),
+            ],
+          ),
+          ),
+        );
   }
 }
