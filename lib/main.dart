@@ -13,7 +13,17 @@ class MyState extends ChangeNotifier{
     Todo(title: 'Meditate'),
   ];
 
-  List<Todo> get todos => _todos;
+  String _filter = 'all';
+
+  List<Todo> get todos{
+    if (_filter == 'done'){                               //returns a new list with only the todos where todo.done==true
+      return _todos.where((todo) => todo.done).toList();
+    }
+    else if (_filter == 'undone'){
+      return _todos.where((todo) => !todo.done).toList(); //returns a new list with only the todos where todo.done==false
+    }
+    return _todos; //for "all"
+  }
 
   void addTodo(String title) {
     _todos.add(Todo(title: title));
@@ -27,10 +37,13 @@ class MyState extends ChangeNotifier{
     todo.done = value ?? false;               //if value is null, set todo.done to false
     notifyListeners();
   }
+  void setFilter(String filter){
+    _filter = filter;
+    notifyListeners();
+  }
 }
 
 void main() {
-  //MyState state = MyState();
 
   runApp(
     ChangeNotifierProvider(create: (context) => MyState(),
@@ -39,7 +52,7 @@ void main() {
     );
 }
 
-class Todo {         //class with title and done (true/false), can take more info than only a list taking String (as used before)
+class Todo {         //"model-class" with title and done (true/false), can take more info than only a list taking String (as used before)
   String title;
   bool done;
 
@@ -58,8 +71,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class TodoItem extends StatelessWidget {  //creates (or removes) a new item in the list, a title/name is required to add
-  final Todo todo;
+class TodoItem extends StatelessWidget {  //creates (or removes) a new item in the list (as a widget) and determines how a Todo-object should look in the UI
+  final Todo todo;                        //takes in a Todo-object
 
   const TodoItem({super.key, required this.todo});
   
@@ -72,7 +85,10 @@ class TodoItem extends StatelessWidget {  //creates (or removes) a new item in t
       margin: EdgeInsetsGeometry.all(5),
       child: Row(
         children: [
-          Checkbox(value: todo.done, onChanged: (newValue){state.checkTodo(todo, newValue);}, activeColor: Colors.pink), //"newValue" is set to true or false when the box is clicked 
+          Checkbox(
+            value: todo.done, 
+            onChanged: (newValue){
+              state.checkTodo(todo, newValue);},activeColor: Colors.pink), //"newValue" is set to true or false when the box is clicked 
           Text(todo.title, style: TextStyle(fontSize: 20, decoration: todo.done ? TextDecoration.lineThrough : TextDecoration.none)), //format= condition ? valueIfTrue : valueIfFalse
           Spacer(),
           IconButton(icon: Icon(Icons.close), onPressed: () => state.removeTodo(todo),), //remove item if user clicks on the iconbutton
@@ -87,7 +103,6 @@ class MyHomePage extends StatelessWidget {
 
   MyHomePage({super.key, required this.title});
 
-
   @override
   Widget build(BuildContext context) {
     var state = context.watch<MyState>();
@@ -98,11 +113,13 @@ class MyHomePage extends StatelessWidget {
         title: Text('TIG333 TODO'),
         centerTitle: true,
         actions: [
-          PopupMenuButton(itemBuilder: (context) =>[     //menu in the upper right corner for filtering
-            PopupMenuItem(value: 1, child: Text('all')),
-            PopupMenuItem(value: 2, child: Text('done'), ),
-            PopupMenuItem(value: 3, child: Text('undone'),),
-          ])
+          PopupMenuButton<String>(onSelected: (filter){var state = context.read<MyState>(); state.setFilter(filter);}, //filtering by sending chosen filter (from the menu) to MyState.setFilter()
+          itemBuilder: (context) =>[     //menu in the upper right corner for filtering                                //which updates the current filter state
+            PopupMenuItem(value: 'all', child: Text('All')),
+            PopupMenuItem(value: 'done', child: Text('Done'), ),
+            PopupMenuItem(value: 'undone', child: Text('Undone'),),
+          ],
+          )
         ],
         
       ),
