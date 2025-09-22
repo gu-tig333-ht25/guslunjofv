@@ -179,6 +179,8 @@ class AddPage extends StatelessWidget{    //the second page
                       if (controller.text.isNotEmpty){
                         state.addTodo(controller.text);
                       }
+                      Navigator.pop(context, MaterialPageRoute(builder: (context)=> MyHomePage(title: '')), //Go to homepage after adding item
+                      );
                     } 
                   ),
                 ),
