@@ -2,37 +2,61 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class MyState extends ChangeNotifier{
-  final List<String> _todos = [
-    "Write a book",
-    "Do homework",
-    "Tidy room",
-    "Watch TV",
-    "Nap",
-    "Shop groceries",
-    "Have fun",
-    "Meditate",
+  final List<Todo> _todos = [          //list with the items included in the app's todolist
+    Todo(title: 'Write a book'),
+    Todo(title: 'Do homework'),
+    Todo(title: 'Tidy room', done: true),
+    Todo(title: 'Watch TV'),
+    Todo(title: 'Nap'),
+    Todo(title: 'Shop groceries'),
+    Todo(title: 'Have fun'),
+    Todo(title: 'Meditate'),
   ];
 
-  List<String> get todos => _todos;
+  String _filter = 'all';
+
+  List<Todo> get todos{
+    if (_filter == 'done'){                               //returns a new list with only the todos where todo.done==true
+      return _todos.where((todo) => todo.done).toList();
+    }
+    else if (_filter == 'undone'){
+      return _todos.where((todo) => !todo.done).toList(); //returns a new list with only the todos where todo.done==false
+    }
+    return _todos; //for "all"
+  }
 
   void addTodo(String title) {
-    _todos.add(title);
+    _todos.add(Todo(title: title));
     notifyListeners();
 }
-  void removeTodo(String title) {
-    _todos.remove(title);
+  void removeTodo(Todo todo) {
+    _todos.remove(todo);
+    notifyListeners();
+  }
+    void checkTodo(Todo todo, bool? value) {  
+    todo.done = value ?? false;               //if value is null, set todo.done to false
+    notifyListeners();
+  }
+  void setFilter(String filter){
+    _filter = filter;
     notifyListeners();
   }
 }
 
 void main() {
-  //MyState state = MyState();
 
   runApp(
     ChangeNotifierProvider(create: (context) => MyState(),
     child: MyApp(),
     ),
     );
+}
+
+class Todo {         //"model-class" with title and done (true/false), can take more info than only a list taking String (as used before)
+  String title;
+  bool done;
+
+  Todo({required this.title, this.done = false});
 }
 
 class MyApp extends StatelessWidget {
@@ -47,10 +71,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class TodoItem extends StatelessWidget {  //creates (or removes) a new item in the list, a title/name is required to add
-  final String title;
+class TodoItem extends StatelessWidget {  //creates (or removes) a new item in the list (as a widget) and determines how a Todo-object should look in the UI
+  final Todo todo;                        //takes in a Todo-object
 
-  const TodoItem({super.key, required this.title});
+  const TodoItem({super.key, required this.todo});
   
   @override
   Widget build(BuildContext context) {
@@ -61,10 +85,13 @@ class TodoItem extends StatelessWidget {  //creates (or removes) a new item in t
       margin: EdgeInsetsGeometry.all(5),
       child: Row(
         children: [
-          IconButton(icon: Icon(Icons.square_outlined), onPressed: (){},),  //gör om detta till en iconbutton också (för att kunna kryssa i rutan)?? 
-          Text(title, style: TextStyle(fontSize: 20)),
+          Checkbox(
+            value: todo.done, 
+            onChanged: (newValue){
+              state.checkTodo(todo, newValue);},activeColor: Colors.pink), //"newValue" is set to true or false when the box is clicked 
+          Text(todo.title, style: TextStyle(fontSize: 20, decoration: todo.done ? TextDecoration.lineThrough : TextDecoration.none)), //format= condition ? valueIfTrue : valueIfFalse
           Spacer(),
-          IconButton(icon: Icon(Icons.close), onPressed: () => state.removeTodo(title),), //remove item if user clicks on the iconbutton
+          IconButton(icon: Icon(Icons.close), onPressed: () => state.removeTodo(todo),), //remove item if user clicks on the iconbutton
         ],
       ),
     );
@@ -76,7 +103,6 @@ class MyHomePage extends StatelessWidget {
 
   MyHomePage({super.key, required this.title});
 
-
   @override
   Widget build(BuildContext context) {
     var state = context.watch<MyState>();
@@ -87,16 +113,18 @@ class MyHomePage extends StatelessWidget {
         title: Text('TIG333 TODO'),
         centerTitle: true,
         actions: [
-          PopupMenuButton(itemBuilder: (context) =>[     //menu in the upper right corner for filtering
-            PopupMenuItem(value: 1, child: Text('all')),
-            PopupMenuItem(value: 2, child: Text('done'), ),
-            PopupMenuItem(value: 3, child: Text('undone'),),
-          ])
+          PopupMenuButton<String>(onSelected: (filter){var state = context.read<MyState>(); state.setFilter(filter);}, //filtering by sending chosen filter (from the menu) to MyState.setFilter()
+          itemBuilder: (context) =>[     //menu in the upper right corner for filtering                                //which updates the current filter state
+            PopupMenuItem(value: 'all', child: Text('All')),
+            PopupMenuItem(value: 'done', child: Text('Done'), ),
+            PopupMenuItem(value: 'undone', child: Text('Undone'),),
+          ],
+          )
         ],
         
       ),
-      body: ListView(                            //using the TodoItem class to add a new item in the list, title is required
-        children: state.todos.map((title) => TodoItem(title: title)).toList(),
+      body: ListView(                            //builds a new TodoItem widget for every Todo in the list
+        children: state.todos.map((todo) => TodoItem(todo: todo)).toList(),
           ),
 
       floatingActionButton: FloatingActionButton(              //button to navigate to the next page (AddPage())
@@ -151,6 +179,8 @@ class AddPage extends StatelessWidget{    //the second page
                       if (controller.text.isNotEmpty){
                         state.addTodo(controller.text);
                       }
+                      Navigator.pop(context, MaterialPageRoute(builder: (context)=> MyHomePage(title: '')), //Go to homepage after adding item
+                      );
                     } 
                   ),
                 ),
