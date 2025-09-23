@@ -19,12 +19,18 @@ Future<List<Todo>> getTodos() async{
 }
 
 Future<void> postTodo(String title) async {
-  final response = await http.post(
-    Uri.parse('$ENDPOINT/todos?key=ca7609f6-fd29-4a43-b592-af7b36fb80b6'),
+  final response = await http.post(Uri.parse('$ENDPOINT/todos?key=ca7609f6-fd29-4a43-b592-af7b36fb80b6'),
     headers: {"Content-Type": "application/json"},
     body: jsonEncode({
       "title": title,
       "done": false,
     }),
+  );
+}
+
+Future<void> putTodo(String id, bool done) async {
+  final response = await http.put(Uri.parse('$ENDPOINT/todos/$id?key=ca7609f6-fd29-4a43-b592-af7b36fb80b6'),
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({"done": done}),
   );
 }

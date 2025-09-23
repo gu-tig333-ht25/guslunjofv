@@ -15,7 +15,7 @@ class MyState extends ChangeNotifier{
   ];
 
   MyState(){
-    fetchNotes();
+    fetchTodos();
   }
 
   String _filter = 'all';
@@ -31,25 +31,30 @@ class MyState extends ChangeNotifier{
   }
 
   void addTodo(String title) {
-    _todos.add(Todo(title: title));
+    _todos.add(Todo(title: title)); //PROBLEM!! Todo har nu id required...
     notifyListeners();
 }
   void removeTodo(Todo todo) {
     _todos.remove(todo);
     notifyListeners();
   }
-    void checkTodo(Todo todo, bool? value) {  
+    void checkTodo(Todo todo, bool? value) async{  
     todo.done = value ?? false;               //if value is null, set todo.done to false
     notifyListeners();
+    await putTodo(todo.id, todo.done);
   }
   void setFilter(String filter){
     _filter = filter;
     notifyListeners();
   }
-  void fetchNotes() async{
+  void fetchTodos() async{
     var todos = await getTodos();
     _todos = todos;
     notifyListeners();
+  }
+  void listNewTodo(String title) async{  
+    await postTodo(title);               //uses the API to add a todo, and fetch the new updated list of todos
+    fetchTodos();
   }
 }
 
@@ -65,11 +70,12 @@ void main() {
 class Todo {         //"model-class" with title and done (true/false), can take more info than only a list taking String (as used before)
   String title;
   bool done;
+  String id;
 
-  Todo({required this.title, this.done = false});
+  Todo({required this.title, this.done = false, required this.id}); //id added for "putTodo"
 
     factory Todo.fromJson(Map<String, dynamic>json){
-    return Todo(title: json['title'], done: json['done'] ?? false); //if null, set to false
+    return Todo(title: json['title'], done: json['done'] ?? false, id: json['id']); //if null, set to false
   }
 }
 
@@ -191,8 +197,9 @@ class AddPage extends StatelessWidget{    //the second page
                     child: Text('+ Add', style: TextStyle(color: Colors.black),),
                     onPressed: () async {
                       if (controller.text.isNotEmpty){
-                        await postTodo(controller.text);
-                        state.fetchNotes();
+                       // await postTodo(controller.text);
+                        context.read<MyState>().listNewTodo(controller.text); //want to call the API via MyState (to not handle states/updating inside the widget) 
+                        //state.fetchNotes();                                 //-> don't use fetchTodos() here
                         //getTodos();
                       }
                       Navigator.pop(context, MaterialPageRoute(builder: (context)=> MyHomePage(title: '')), //Go to homepage after adding item
