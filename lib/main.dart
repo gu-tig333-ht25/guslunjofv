@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import './api.dart';
 
 class MyState extends ChangeNotifier{
-  final List<Todo> _todos = [          //list with the items included in the app's todolist
-    Todo(title: 'Write a book'),
+  List<Todo> _todos = [          //list with the items included in the app's todolist
+    /*Todo(title: 'Write a book'),
     Todo(title: 'Do homework'),
     Todo(title: 'Tidy room', done: true),
     Todo(title: 'Watch TV'),
     Todo(title: 'Nap'),
     Todo(title: 'Shop groceries'),
     Todo(title: 'Have fun'),
-    Todo(title: 'Meditate'),
+    Todo(title: 'Meditate'),*/
   ];
+
+  MyState(){
+    fetchNotes();
+  }
 
   String _filter = 'all';
 
@@ -41,6 +46,11 @@ class MyState extends ChangeNotifier{
     _filter = filter;
     notifyListeners();
   }
+  void fetchNotes() async{
+    var todos = await getTodos();
+    _todos = todos;
+    notifyListeners();
+  }
 }
 
 void main() {
@@ -57,6 +67,10 @@ class Todo {         //"model-class" with title and done (true/false), can take 
   bool done;
 
   Todo({required this.title, this.done = false});
+
+    factory Todo.fromJson(Map<String, dynamic>json){
+    return Todo(title: json['title'], done: json['done'] ?? false); //if null, set to false
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -175,9 +189,11 @@ class AddPage extends StatelessWidget{    //the second page
                 Container(
                   child: TextButton(
                     child: Text('+ Add', style: TextStyle(color: Colors.black),),
-                    onPressed: (){
+                    onPressed: () async {
                       if (controller.text.isNotEmpty){
-                        state.addTodo(controller.text);
+                        await postTodo(controller.text);
+                        state.fetchNotes();
+                        //getTodos();
                       }
                       Navigator.pop(context, MaterialPageRoute(builder: (context)=> MyHomePage(title: '')), //Go to homepage after adding item
                       );
