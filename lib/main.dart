@@ -30,15 +30,20 @@ class MyState extends ChangeNotifier{
     return _todos; //for "all"
   }
 
-  void addTodo(String title) {
-    _todos.add(Todo(title: title)); //PROBLEM!! Todo har nu id required...
+  /*void addTodo(String title) {
+    _todos.add(Todo(title: title)); //PROBLEM!! Todo har nu id required... kan använda listNewTodo() istället?
     notifyListeners();
-}
-  void removeTodo(Todo todo) {
+}*/
+   Future<void> removeTodo(Todo todo) async{
+    await deleteTodo(todo.id);
     _todos.remove(todo);
     notifyListeners();
-  }
-    void checkTodo(Todo todo, bool? value) async{  
+    //_todos.remove(todo);
+    //notifyListeners();                      
+    //await deleteTodo(todo.id); 
+   }
+  
+    Future<void> checkTodo(Todo todo, bool? value) async{  
     todo.done = value ?? false;               //if value is null, set todo.done to false
     notifyListeners();
     await putTodo(todo.id, todo.done);
@@ -47,14 +52,15 @@ class MyState extends ChangeNotifier{
     _filter = filter;
     notifyListeners();
   }
-  void fetchTodos() async{
+  Future<void> fetchTodos() async{
     var todos = await getTodos();
     _todos = todos;
     notifyListeners();
   }
-  void listNewTodo(String title) async{  
+  Future<void> listNewTodo(String title) async{  
     await postTodo(title);               //uses the API to add a todo, and fetch the new updated list of todos
-    fetchTodos();
+    fetchTodos();                
+    //notifyListeners();
   }
 }
 

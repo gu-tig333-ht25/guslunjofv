@@ -34,3 +34,9 @@ Future<void> putTodo(String id, bool done) async {
     body: jsonEncode({"done": done}),
   );
 }
+
+Future<void> deleteTodo(String id) async {
+  final response = await http.delete(Uri.parse('$ENDPOINT/todos/$id?key=ca7609f6-fd29-4a43-b592-af7b36fb80b6'),
+  headers: {"Content-Type": "application/json"},
+  );
+}
