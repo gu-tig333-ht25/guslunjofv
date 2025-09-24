@@ -21,17 +21,19 @@ Future<List<Todo>> getTodos() async{
 Future<void> postTodo(String title) async {
   final response = await http.post(Uri.parse('$ENDPOINT/todos?key=ca7609f6-fd29-4a43-b592-af7b36fb80b6'),
     headers: {"Content-Type": "application/json"},
-    body: jsonEncode({
-      "title": title,
-      "done": false,
-    }),
+    body: jsonEncode({"title": title, "done": false}),
   );
+
+  if (response.statusCode != 200 && response.statusCode != 201) {
+    throw Exception("Failed to create todo: ${response.statusCode}");
+  }
 }
 
-Future<void> putTodo(String id, bool done) async {
+
+Future<void> putTodo(String id, bool done, String title) async {
   final response = await http.put(Uri.parse('$ENDPOINT/todos/$id?key=ca7609f6-fd29-4a43-b592-af7b36fb80b6'),
     headers: {"Content-Type": "application/json"},
-    body: jsonEncode({"done": done}),
+    body: jsonEncode({"done": done, "title": title}),
   );
 }
 

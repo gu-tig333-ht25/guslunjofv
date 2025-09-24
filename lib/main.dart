@@ -30,37 +30,29 @@ class MyState extends ChangeNotifier{
     return _todos; //for "all"
   }
 
-  /*void addTodo(String title) {
-    _todos.add(Todo(title: title)); //PROBLEM!! Todo har nu id required... kan använda listNewTodo() istället?
-    notifyListeners();
-}*/
    Future<void> removeTodo(Todo todo) async{
-    await deleteTodo(todo.id);
-    _todos.remove(todo);
+    await deleteTodo(todo.id);               //delete the id corresponding to the todo
+    _todos.remove(todo);                     //delete todo from the list
     notifyListeners();
-    //_todos.remove(todo);
-    //notifyListeners();                      
-    //await deleteTodo(todo.id); 
    }
   
     Future<void> checkTodo(Todo todo, bool? value) async{  
     todo.done = value ?? false;               //if value is null, set todo.done to false
     notifyListeners();
-    await putTodo(todo.id, todo.done);
+    await putTodo(todo.id, todo.done, todo.title);  //all variables are needed to change the "state" of checkbox (to not get for ex. an empty title)
   }
   void setFilter(String filter){
     _filter = filter;
     notifyListeners();
   }
-  Future<void> fetchTodos() async{
+  Future<void> fetchTodos() async{           //uses getTodos() which returns a list of todos from the API to use here
     var todos = await getTodos();
     _todos = todos;
     notifyListeners();
   }
-  Future<void> listNewTodo(String title) async{  
+  Future<void> listNewTodo(String title) async{   //addTodo() got replaced to this
     await postTodo(title);               //uses the API to add a todo, and fetch the new updated list of todos
-    fetchTodos();                
-    //notifyListeners();
+    await fetchTodos();                
   }
 }
 
@@ -80,9 +72,14 @@ class Todo {         //"model-class" with title and done (true/false), can take 
 
   Todo({required this.title, this.done = false, required this.id}); //id added for "putTodo"
 
-    factory Todo.fromJson(Map<String, dynamic>json){
-    return Todo(title: json['title'], done: json['done'] ?? false, id: json['id']); //if null, set to false
-  }
+  factory Todo.fromJson(Map<String, dynamic> json) {
+  return Todo(
+    title: json['title']?.toString() ?? '',
+    done: json['done'] ?? false,
+    id: json['id']?.toString() ?? '', 
+  );
+}
+
 }
 
 class MyApp extends StatelessWidget {
@@ -203,13 +200,10 @@ class AddPage extends StatelessWidget{    //the second page
                     child: Text('+ Add', style: TextStyle(color: Colors.black),),
                     onPressed: () async {
                       if (controller.text.isNotEmpty){
-                       // await postTodo(controller.text);
                         context.read<MyState>().listNewTodo(controller.text); //want to call the API via MyState (to not handle states/updating inside the widget) 
-                        //state.fetchNotes();                                 //-> don't use fetchTodos() here
-                        //getTodos();
+                                                                              //-> don't use fetchTodos() here
                       }
-                      Navigator.pop(context, MaterialPageRoute(builder: (context)=> MyHomePage(title: '')), //Go to homepage after adding item
-                      );
+                      Navigator.pop(context); //Go to homepage after adding item
                     } 
                   ),
                 ),
