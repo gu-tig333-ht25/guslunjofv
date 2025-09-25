@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'main.dart';
+import './main.dart';
+import './model.dart';
 
 const String ENDPOINT = 'https://todoapp-api.apps.k8s.gu.se';
 const String myKey = 'ca7609f6-fd29-4a43-b592-af7b36fb80b6';  //"hardcoded" so the same list of todos appear every time the app starts
