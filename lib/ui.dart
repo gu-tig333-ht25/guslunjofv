@@ -108,7 +108,7 @@ class AddPage extends StatelessWidget{    //the second page
                   child: TextButton(
                     child: Text('+ Add', style: TextStyle(color: Colors.black),),
                     onPressed: () async {
-                      if (controller.text.isNotEmpty){
+                      if (controller.text.trim().isNotEmpty){
                         context.read<MyState>().listNewTodo(controller.text); //want to call the API via MyState (to not handle states/updating inside the widget) 
                                                                               //-> don't use fetchTodos() here
                       }

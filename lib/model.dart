@@ -1,7 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import './main.dart';
-
 class Todo {         //"model-class" with title, done (true/false) and id
   String title;
   bool done;
