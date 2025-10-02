@@ -19,7 +19,7 @@ Future<List<Todo>> getTodos() async{
   return todosJson.map((json) => Todo.fromJson(json)).toList();
 }
 
-Future<void> postTodo(String title) async {
+Future<List<dynamic>> postTodo(String title) async {
   final response = await http.post(Uri.parse('$ENDPOINT/todos?key=$myKey'),
     headers: {"Content-Type": "application/json"},
     body: jsonEncode({"title": title, "done": false}),             //only title and done is submitted, not id
@@ -28,6 +28,7 @@ Future<void> postTodo(String title) async {
   if (response.statusCode != 200 && response.statusCode != 201) {
     throw Exception("Failed to create todo: ${response.statusCode}");
   }
+  return jsonDecode(response.body) as List<dynamic>;
 }
 
 
