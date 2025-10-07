@@ -36,19 +36,15 @@ class MyState extends ChangeNotifier {
   }
 
   Future<void> checkTodo(Todo todo, bool? value) async {
-    var oldValue = todo.done;
-    var newValue = value ?? false;
-
-    todo.done = newValue; //if value is null, set todo.done to false
-    notifyListeners();
+    var newValue = value ?? false; //if value is null, set newValue to false
 
     try {
       await putTodo(todo.id, newValue, todo.title);
       //all variables are needed to change the "state" of checkbox (to not get for ex. an empty title)
-    } catch (e) {
-      todo.done =
-          oldValue; //if the server call with putTodo was not successful, "un-do" the check (local change)
+      todo.done = newValue;
       notifyListeners();
+    } catch (e) {
+      debugPrint('Failed to update');
     }
   }
 
